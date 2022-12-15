@@ -40,7 +40,10 @@ The commit message to be used in the output repository. Optional and defaults to
 The string `ORIGIN_COMMIT` is replaced by `$REPOSITORY_URL@commit`.
 
 ### `target-directory` (argument) [optional]
-The directory to wipe and replace in the target repository.  Defaults to wiping the entire repository
+The directory to wipe and replace in the target repository. Defaults to wiping the entire repository
+
+### `gpg-fingerprint` (argument) [optional]
+The GPG fingerprint with which to sign the commit with. Can be used with `https://github.com/crazy-max/ghaction-import-gpg`
 
 ### `API_TOKEN_GITHUB` (environment)
 E.g.:

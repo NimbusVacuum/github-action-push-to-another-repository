@@ -15,6 +15,7 @@ DESTINATION_REPOSITORY_USERNAME="$8"
 TARGET_BRANCH="$9"
 COMMIT_MESSAGE="${10}"
 TARGET_DIRECTORY="${11}"
+GPG_FINGERPRINT="${12}"
 
 if [ -z "$DESTINATION_REPOSITORY_USERNAME" ]
 then
@@ -33,6 +34,12 @@ echo "[+] Cloning destination git repository $DESTINATION_REPOSITORY_NAME"
 git config --global user.email "$USER_EMAIL"
 git config --global user.name "$USER_NAME"
 
+if [ ! -z "$GPG_FINGERPRINT" ]
+then
+	git config --global commit.gpgsign true
+	git config --global user.signingkey "$GPG_FINGERPRINT"
+fi
+
 {
 	git clone --single-branch --branch "$TARGET_BRANCH" "https://$USER_NAME:$API_TOKEN_GITHUB@$GITHUB_SERVER/$DESTINATION_REPOSITORY_USERNAME/$DESTINATION_REPOSITORY_NAME.git" "$CLONE_DIR"
 } || {
@@ -50,6 +57,7 @@ TEMP_DIR=$(mktemp -d)
 # but not anymore. Otherwise we had to remove the files from "$CLONE_DIR",
 # including "." and with the exception of ".git/"
 mv "$CLONE_DIR/.git" "$TEMP_DIR/.git"
+mv "$CLONE_DIR/.github" "$TEMP_DIR/.github"
 
 # $TARGET_DIRECTORY is '' by default
 ABSOLUTE_TARGET_DIRECTORY="$CLONE_DIR/$TARGET_DIRECTORY/"
@@ -67,6 +75,7 @@ echo "[+] Listing root Location"
 ls -al /
 
 mv "$TEMP_DIR/.git" "$CLONE_DIR/.git"
+mv "$TEMP_DIR/.github" "$CLONE_DIR/.github"
 
 echo "[+] List contents of $SOURCE_DIRECTORY"
 ls "$SOURCE_DIRECTORY"
@@ -105,7 +114,7 @@ git status
 
 echo "[+] git diff-index:"
 # git diff-index : to avoid doing the git commit failing if there are no changes to be commit
-git diff-index --quiet HEAD || git commit --message "$COMMIT_MESSAGE"
+git diff-index --quiet HEAD || git commit -s --message "$COMMIT_MESSAGE"
 
 echo "[+] Pushing git commit"
 # --set-upstream: sets de branch when pushing to a branch that does not exist
